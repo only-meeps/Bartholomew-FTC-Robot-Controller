@@ -1,4 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
-public class BartholomewAutonomous {
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+@Autonomous
+public class BartholomewAutonomous extends OpMode {
+    @Override
+    public void init(){
+
+    }
+
+    @Override
+    public void loop(){
+
+    }
 }
