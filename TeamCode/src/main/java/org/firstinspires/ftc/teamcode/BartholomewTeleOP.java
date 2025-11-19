@@ -27,7 +27,7 @@ public class BartholomewTeleOP extends LinearOpMode
     DcMotor rearLeftMotor;
     DcMotor rearRightMotor;
     DcMotor weedWacker;
-    double weedWackerSpeed = 1.0;
+    double weedWackerSpeed = 0.0;
     final double SPEED_INCREMENT = 0.01;  // Adjust this value to change the smoothness
     final double MAX_SPEED = 1.0;
     final double MIN_SPEED = 0.0;
@@ -46,34 +46,35 @@ public class BartholomewTeleOP extends LinearOpMode
         while (opModeIsActive())
         {
             double leftStickY = gamepad1.left_stick_y;
-            double leftStickX = gamepad1.left_stick_x;
-            double rightStickX = gamepad1.right_stick_x;
+            double leftStickX = -gamepad1.left_stick_x;
+            double rightStickX = -gamepad1.right_stick_x;
             double rightStickY = gamepad1.right_stick_y;
 
-            double leftPower = leftStickY + leftStickX;
-            double rightPower = -leftStickY + leftStickX;
+            double leftPower = leftStickY + leftStickX * 0.5;
+            double rightPower = -leftStickY + leftStickX * 0.5;
 
-            if (rightStickX != 0)
+            if (leftStickX > 0)
             {
-                rearLeftMotor.setPower(rightStickX);
-                frontLeftMotor.setPower(rightStickX);
-                frontRightMotor.setPower(rightStickX);
-                rearRightMotor.setPower(rightStickX);
+                rearLeftMotor.setPower(leftPower);
+                frontLeftMotor.setPower(leftPower);
+                frontRightMotor.setPower(rightPower);
+                rearRightMotor.setPower(-rightPower);
             }
-            else if(leftStickY != 0)
+            else if (leftStickX < 0)
             {
-                rearLeftMotor.setPower(leftStickY);
-                frontLeftMotor.setPower(leftStickY);
-                frontRightMotor.setPower(leftStickY);
-                rearRightMotor.setPower(leftStickY);
+                rearLeftMotor.setPower(leftPower);
+                frontLeftMotor.setPower(leftPower);
+                rearRightMotor.setPower(-rightPower);
+                frontRightMotor.setPower(rightPower);
             }
             else
             {
-                rearLeftMotor.setPower(0);
-                frontLeftMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                rearRightMotor.setPower(0);
+                rearLeftMotor.setPower(leftPower);
+                frontLeftMotor.setPower(leftPower);
+                rearRightMotor.setPower(-rightPower);
+                frontRightMotor.setPower(rightPower);
             }
+
             if (gamepad1.right_bumper)
             {
                 weedWacker.setPower(weedWackerSpeed);
@@ -101,17 +102,13 @@ public class BartholomewTeleOP extends LinearOpMode
 
             if (gamepad1.right_trigger > 0.3)
             {
-                rearLeftMotor.setPower(gamepad1.right_trigger);
-                frontLeftMotor.setPower(-gamepad1.right_trigger);
-                frontRightMotor.setPower(gamepad1.right_trigger);
-                rearRightMotor.setPower(-gamepad1.right_trigger);
+                rearRightMotor.setPower(1.0);
+                frontRightMotor.setPower(1.0);
             }
             if (gamepad1.left_trigger > 0.3)
             {
-                rearLeftMotor.setPower(-gamepad1.left_trigger);
-                frontLeftMotor.setPower(gamepad1.left_trigger);
-                frontRightMotor.setPower(-gamepad1.left_trigger);
-                rearRightMotor.setPower(gamepad1.left_trigger);
+                rearLeftMotor.setPower(-1.0);
+                frontLeftMotor.setPower(-1.0);
             }
 
             //This is causing issues.
@@ -123,7 +120,7 @@ public class BartholomewTeleOP extends LinearOpMode
                 frontRightMotor.setPower(-1);
             }
 
-            if (gamepad1.dpad_right)
+            if (gamepad1.dpad_right && 0.5 < 1)
             {
                 double speed = 0.5;
                 speed += SPEED_INCREMENT;
@@ -132,7 +129,7 @@ public class BartholomewTeleOP extends LinearOpMode
                 rightPower = -leftStickY + leftStickX * speed;
 
             }
-            if (gamepad1.dpad_left)
+            if (gamepad1.dpad_left && 0.5 > 0)
             {
                 double speed = 0.5;
                 speed -= SPEED_INCREMENT;
