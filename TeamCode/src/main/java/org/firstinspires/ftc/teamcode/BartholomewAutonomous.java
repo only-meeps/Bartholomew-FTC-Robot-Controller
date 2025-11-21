@@ -20,6 +20,8 @@ public class BartholomewAutonomous extends OpMode {
     private DistanceSensor sensor_fl;
     private DistanceSensor sensor_fr;
 
+    //hi
+
     private AutoMovementDirection currentMoveDirection;
     private AutoTurnDirection currentTurnDirection;
 
