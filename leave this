@@ -1,0 +1,113 @@
+[33mcommit 029e75ad51718bdaf5105477f33a3ddfbadfb873[m
+Author: AwesomeMeeps <ffkoenig@gmail.com>
+Date:   Fri Nov 14 16:53:29 2025 -0800
+
+    Added strafing and multistick movement
+
+[1mdiff --git a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BartholomewTeleOP.java b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BartholomewTeleOP.java[m
+[1mindex 66bc348..6e51077 100644[m
+[1m--- a/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BartholomewTeleOP.java[m
+[1m+++ b/TeamCode/src/main/java/org/firstinspires/ftc/teamcode/BartholomewTeleOP.java[m
+[36m@@ -27,7 +27,7 @@[m [mpublic class BartholomewTeleOP extends LinearOpMode[m
+     DcMotor rearLeftMotor;[m
+     DcMotor rearRightMotor;[m
+     DcMotor weedWacker;[m
+[31m-    double weedWackerSpeed = 0.0;[m
+[32m+[m[32m    double weedWackerSpeed = 1.0;[m
+     final double SPEED_INCREMENT = 0.01;  // Adjust this value to change the smoothness[m
+     final double MAX_SPEED = 1.0;[m
+     final double MIN_SPEED = 0.0;[m
+[36m@@ -46,35 +46,34 @@[m [mpublic class BartholomewTeleOP extends LinearOpMode[m
+         while (opModeIsActive())[m
+         {[m
+             double leftStickY = gamepad1.left_stick_y;[m
+[31m-            double leftStickX = -gamepad1.left_stick_x;[m
+[31m-            double rightStickX = -gamepad1.right_stick_x;[m
+[32m+[m[32m            double leftStickX = gamepad1.left_stick_x;[m
+[32m+[m[32m            double rightStickX = gamepad1.right_stick_x;[m
+             double rightStickY = gamepad1.right_stick_y;[m
+ [m
+[31m-            double leftPower = leftStickY + leftStickX * 0.5;[m
+[31m-            double rightPower = -leftStickY + leftStickX * 0.5;[m
+[32m+[m[32m            double leftPower = leftStickY + leftStickX;[m
+[32m+[m[32m            double rightPower = -leftStickY + leftStickX;[m
+ [m
+[31m-            if (leftStickX > 0)[m
+[32m+[m[32m            if (rightStickX != 0)[m
+             {[m
+[31m-                rearLeftMotor.setPower(leftPower);[m
+[31m-                frontLeftMotor.setPower(leftPower);[m
+[31m-                frontRightMotor.setPower(rightPower);[m
+[31m-                rearRightMotor.setPower(-rightPower);[m
+[32m+[m[32m                rearLeftMotor.setPower(rightStickX);[m
+[32m+[m[32m                frontLeftMotor.setPower(rightStickX);[m
+[32m+[m[32m                frontRightMotor.setPower(rightStickX);[m
+[32m+[m[32m                rearRightMotor.setPower(rightStickX);[m
+             }[m
+[31m-            else if (leftStickX < 0)[m
+[32m+[m[32m            else if(leftStickY != 0)[m
+             {[m
+[31m-                rearLeftMotor.setPower(leftPower);[m
+[31m-                frontLeftMotor.setPower(leftPower);[m
+[31m-                rearRightMotor.setPower(-rightPower);[m
+[31m-                frontRightMotor.setPower(rightPower);[m
+[32m+[m[32m                rearLeftMotor.setPower(leftStickY);[m
+[32m+[m[32m                frontLeftMotor.setPower(leftStickY);[m
+[32m+[m[32m                frontRightMotor.setPower(leftStickY);[m
+[32m+[m[32m                rearRightMotor.setPower(leftStickY);[m
+             }[m
+             else[m
+             {[m
+[31m-                rearLeftMotor.setPower(leftPower);[m
+[31m-                frontLeftMotor.setPower(leftPower);[m
+[31m-                rearRightMotor.setPower(-rightPower);[m
+[31m-                frontRightMotor.setPower(rightPower);[m
+[32m+[m[32m                rearLeftMotor.setPower(0);[m
+[32m+[m[32m                frontLeftMotor.setPower(0);[m
+[32m+[m[32m                frontRightMotor.setPower(0);[m
+[32m+[m[32m                rearRightMotor.setPower(0);[m
+             }[m
+[31m-[m
+             if (gamepad1.right_bumper)[m
+             {[m
+                 weedWacker.setPower(weedWackerSpeed);[m
+[36m@@ -102,13 +101,17 @@[m [mpublic class BartholomewTeleOP extends LinearOpMode[m
+ [m
+             if (gamepad1.right_trigger > 0.3)[m
+             {[m
+[31m-                rearRightMotor.setPower(1.0);[m
+[31m-                frontRightMotor.setPower(1.0);[m
+[32m+[m[32m                rearLeftMotor.setPower(gamepad1.right_trigger);[m
+[32m+[m[32m                frontLeftMotor.setPower(-gamepad1.right_trigger);[m
+[32m+[m[32m                frontRightMotor.setPower(gamepad1.right_trigger);[m
+[32m+[m[32m                rearRightMotor.setPower(-gamepad1.right_trigger);[m
+             }[m
+             if (gamepad1.left_trigger > 0.3)[m
+             {[m
+[31m-                rearLeftMotor.setPower(-1.0);[m
+[31m-                frontLeftMotor.setPower(-1.0);[m
+[32m+[m[32m                rearLeftMotor.setPower(-gamepad1.left_trigger);[m
+[32m+[m[32m                frontLeftMotor.setPower(gamepad1.left_trigger);[m
+[32m+[m[32m                frontRightMotor.setPower(-gamepad1.left_trigger);[m
+[32m+[m[32m                rearRightMotor.setPower(gamepad1.left_trigger);[m
+             }[m
+ [m
+             //This is causing issues.[m
+[36m@@ -120,7 +123,7 @@[m [mpublic class BartholomewTeleOP extends LinearOpMode[m
+                 frontRightMotor.setPower(-1);[m
+             }[m
+ [m
+[31m-            if (gamepad1.dpad_right && 0.5 < 1)[m
+[32m+[m[32m            if (gamepad1.dpad_right)[m
+             {[m
+                 double speed = 0.5;[m
+                 speed += SPEED_INCREMENT;[m
+[36m@@ -129,7 +132,7 @@[m [mpublic class BartholomewTeleOP extends LinearOpMode[m
+                 rightPower = -leftStickY + leftStickX * speed;[m
+ [m
+             }[m
+[31m-            if (gamepad1.dpad_left && 0.5 > 0)[m
+[32m+[m[32m            if (gamepad1.dpad_left)[m
+             {[m
+                 double speed = 0.5;[m
+                 speed -= SPEED_INCREMENT;[m
