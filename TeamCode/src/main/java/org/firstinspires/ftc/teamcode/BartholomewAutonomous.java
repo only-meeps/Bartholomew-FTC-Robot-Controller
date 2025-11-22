@@ -18,7 +18,7 @@ public class BartholomewAutonomous extends OpMode {
     private DistanceSensor sensor_rl;
     private DistanceSensor sensor_rr;
     private DistanceSensor sensor_fl;
-    private DistanceSensor sensor_fr;
+    //private DistanceSensor sensor_fr;
 
     //hi
 
@@ -28,7 +28,7 @@ public class BartholomewAutonomous extends OpMode {
     private double rlDistance;
     private double rrDistance;
     private double flDistance;
-    private double frDistance;
+    //private double frDistance;
 
     @Override
     public void init(){
@@ -41,7 +41,7 @@ public class BartholomewAutonomous extends OpMode {
         sensor_rl = hardwareMap.get(DistanceSensor.class, "sensor_rl");
         sensor_rr = hardwareMap.get(DistanceSensor.class, "sensor_rr");
         sensor_fl = hardwareMap.get(DistanceSensor.class, "sensor_fl");
-        sensor_fr = hardwareMap.get(DistanceSensor.class, "sensor_fr");
+        //sensor_fr = hardwareMap.get(DistanceSensor.class, "sensor_fr");
 
     }
 
@@ -61,10 +61,13 @@ public class BartholomewAutonomous extends OpMode {
 
     private boolean canMove(AutoMovementDirection direction){
         if (direction == AutoMovementDirection.Forward){
-            return (flDistance > 20 && frDistance > 20);
+            return (flDistance > 20 /*&& frDistance > 20*/);
         }
         else if (direction == AutoMovementDirection.Back){
             return (rlDistance > 20 && rrDistance > 20);
+        }
+        else{
+            return false;
         }
     }
 
@@ -73,12 +76,12 @@ public class BartholomewAutonomous extends OpMode {
         rlDistance = sensor_rl.getDistance(DistanceUnit.CM);
         rrDistance = sensor_rr.getDistance(DistanceUnit.CM);
         flDistance = sensor_fl.getDistance(DistanceUnit.CM);
-        frDistance = sensor_fr.getDistance(DistanceUnit.CM);
+        //frDistance = sensor_fr.getDistance(DistanceUnit.CM);
 
         telemetry.addData("RL Sensor Distance:", rlDistance);
         telemetry.addData("RR Sensor Distance:", rrDistance);
         telemetry.addData("FL Sensor Distance:", flDistance);
-        telemetry.addData("FR Sensor Distance:", frDistance);
+        //telemetry.addData("FR Sensor Distance:", frDistance);
         telemetry.update();
 
         if (currentMoveDirection != null){
