@@ -3,10 +3,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.I2cAddr;
-import com.qualcomm.robotcore.hardware.I2cDevice;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
-import com.qualcomm.robotcore.hardware.I2cDeviceSynchImplOnSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import java.util.Random;
 
 @Autonomous
 public class BartholomewAutonomous extends OpMode {
@@ -16,10 +15,20 @@ public class BartholomewAutonomous extends OpMode {
     DcMotor rearRightMotor;
     DcMotor weedWacker;
 
-    private static final byte I2C_ADDRESS = 0x70;
-    private byte[] REGISTER_READ_DISTANCE = new byte[1];
+    private DistanceSensor sensor_rl;
+    private DistanceSensor sensor_rr;
+    private DistanceSensor sensor_fl;
+    private DistanceSensor sensor_fr;
 
-    private I2cDeviceSynch sensor_fl;
+    //hi
+
+    private AutoMovementDirection currentMoveDirection;
+    private AutoTurnDirection currentTurnDirection;
+
+    private double rlDistance;
+    private double rrDistance;
+    private double flDistance;
+    private double frDistance;
 
     @Override
     public void init(){
@@ -29,22 +38,56 @@ public class BartholomewAutonomous extends OpMode {
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
         weedWacker = hardwareMap.get(DcMotor.class, "weedwacker");
 
-        sensor_fl = hardwareMap.get(I2cDeviceSynch.class, "sensor_fl");
-        sensor_fl.engage();
-        REGISTER_READ_DISTANCE[0] = (byte)0x51;
+        sensor_rl = hardwareMap.get(DistanceSensor.class, "sensor_rl");
+        sensor_rr = hardwareMap.get(DistanceSensor.class, "sensor_rr");
+        sensor_fl = hardwareMap.get(DistanceSensor.class, "sensor_fl");
+        sensor_fr = hardwareMap.get(DistanceSensor.class, "sensor_fr");
+
+    }
+
+    private AutoMovementDirection getRandomDirection(){
+        AutoMovementDirection[] directions = AutoMovementDirection.values();
+        Random random = new Random();
+        int index = random.nextInt(directions.length);
+        return directions[index];
+    }
+
+    private AutoTurnDirection getRandomTurnDirection(){
+        AutoTurnDirection[] directions = AutoTurnDirection.values();
+        Random random = new Random();
+        int index = random.nextInt(directions.length);
+        return directions[index];
+    }
+
+    private boolean canMove(AutoMovementDirection direction){
+        if (direction == AutoMovementDirection.Forward){
+            return (flDistance > 20 && frDistance > 20);
+        }
+        else if (direction == AutoMovementDirection.Back){
+            return (rlDistance > 20 && rrDistance > 20);
+        }
     }
 
     @Override
     public void loop(){
-        sensor_fl.write(REGISTER_READ_DISTANCE);
-        byte[] data = sensor_fl.read(2);
-        if (data.length == 2){
-            int distanceMm = (data[0] << 8) | data[1];
-            telemetry.addData("Distance (mm)", distanceMm);
+        rlDistance = sensor_rl.getDistance(DistanceUnit.CM);
+        rrDistance = sensor_rr.getDistance(DistanceUnit.CM);
+        flDistance = sensor_fl.getDistance(DistanceUnit.CM);
+        frDistance = sensor_fr.getDistance(DistanceUnit.CM);
+
+        telemetry.addData("RL Sensor Distance:", rlDistance);
+        telemetry.addData("RR Sensor Distance:", rrDistance);
+        telemetry.addData("FL Sensor Distance:", flDistance);
+        telemetry.addData("FR Sensor Distance:", frDistance);
+        telemetry.update();
+
+        if (currentMoveDirection != null){
+            if (currentMoveDirection == AutoMovementDirection.Forward){
+
+            }
         }
         else{
-            telemetry.addData("Distance(mm)", "Error");
+
         }
-        telemetry.update();
     }
 }
