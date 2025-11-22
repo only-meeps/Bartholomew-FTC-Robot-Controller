@@ -59,16 +59,20 @@ public class BartholomewAutonomous extends OpMode {
         return directions[index];
     }
 
-    private boolean canMove(AutoMovementDirection direction){
+    public boolean canMove(AutoMovementDirection direction){
         if (direction == AutoMovementDirection.Forward){
             return (flDistance > 20 /*&& frDistance > 20*/);
         }
         else if (direction == AutoMovementDirection.Back){
             return (rlDistance > 20 && rrDistance > 20);
         }
+<<<<<<< HEAD
         else{
             return false;
         }
+=======
+        return false;
+>>>>>>> 6b6bb9c2f3365567319335ed6ff4e484cbcfed47
     }
 
     @Override
