@@ -68,19 +68,19 @@ public class BartholomewTeleOP extends LinearOpMode
                 {
                     actuallyKilledItself = true;
                 }
-                if (leftStickX != 0)
+                if (rightStickX != 0)
                 {
-                    rearLeftMotor.setPower(leftStickX);
-                    frontLeftMotor.setPower(leftStickX);
-                    frontRightMotor.setPower(leftStickX);
-                    rearRightMotor.setPower(leftStickX);
+                    rearLeftMotor.setPower(-rightStickX);
+                    frontLeftMotor.setPower(-rightStickX);
+                    frontRightMotor.setPower(-rightStickX);
+                    rearRightMotor.setPower(-rightStickX);
                 }
-                else if(rightStickY != 0)
+                else if(leftStickY != 0)
                 {
-                    rearLeftMotor.setPower(rightStickY);
-                    frontLeftMotor.setPower(rightStickY);
-                    frontRightMotor.setPower(-rightStickY);
-                    rearRightMotor.setPower(-rightStickY);
+                    rearLeftMotor.setPower(leftStickY);
+                    frontLeftMotor.setPower(leftStickY);
+                    frontRightMotor.setPower(-leftStickY);
+                    rearRightMotor.setPower(-leftStickY);
                 }
                 else
                 {
