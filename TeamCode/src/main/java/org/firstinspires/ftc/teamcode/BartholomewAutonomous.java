@@ -20,8 +20,6 @@ public class BartholomewAutonomous extends OpMode {
     private DistanceSensor sensor_fl;
     //private DistanceSensor sensor_fr;
 
-    //hi
-
     private AutoMovementDirection currentMoveDirection;
     private AutoTurnDirection currentTurnDirection;
 
@@ -66,13 +64,9 @@ public class BartholomewAutonomous extends OpMode {
         else if (direction == AutoMovementDirection.Back){
             return (rlDistance > 20 && rrDistance > 20);
         }
-<<<<<<< HEAD
         else{
             return false;
         }
-=======
-        return false;
->>>>>>> 6b6bb9c2f3365567319335ed6ff4e484cbcfed47
     }
 
     @Override
