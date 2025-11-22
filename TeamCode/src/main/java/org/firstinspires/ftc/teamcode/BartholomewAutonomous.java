@@ -20,6 +20,8 @@ public class BartholomewAutonomous extends OpMode {
     private DistanceSensor sensor_fl;
     //private DistanceSensor sensor_fr;
 
+    //hi
+
     private AutoMovementDirection currentMoveDirection;
     private AutoTurnDirection currentTurnDirection;
 
@@ -57,15 +59,12 @@ public class BartholomewAutonomous extends OpMode {
         return directions[index];
     }
 
-    public boolean canMove(AutoMovementDirection direction){
+    private boolean canMove(AutoMovementDirection direction){
         if (direction == AutoMovementDirection.Forward){
-            return (flDistance > 20 /*&& frDistance > 20*/);
+            return (flDistance > 20); //&& frDistance > 20);
         }
         else if (direction == AutoMovementDirection.Back){
             return (rlDistance > 20 && rrDistance > 20);
-        }
-        else{
-            return false;
         }
     }
 
@@ -74,12 +73,12 @@ public class BartholomewAutonomous extends OpMode {
         rlDistance = sensor_rl.getDistance(DistanceUnit.CM);
         rrDistance = sensor_rr.getDistance(DistanceUnit.CM);
         flDistance = sensor_fl.getDistance(DistanceUnit.CM);
-        //frDistance = sensor_fr.getDistance(DistanceUnit.CM);
+        frDistance = sensor_fr.getDistance(DistanceUnit.CM);
 
         telemetry.addData("RL Sensor Distance:", rlDistance);
         telemetry.addData("RR Sensor Distance:", rrDistance);
         telemetry.addData("FL Sensor Distance:", flDistance);
-        //telemetry.addData("FR Sensor Distance:", frDistance);
+        telemetry.addData("FR Sensor Distance:", frDistance);
         telemetry.update();
 
         if (currentMoveDirection != null){
