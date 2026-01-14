@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /*
  * This OpMode ramps a single motor speed up and down repeatedly until Stop is pressed.
@@ -30,6 +31,7 @@ public class BartholomewTeleOP extends LinearOpMode
     DcMotor rearRightMotor;
     DcMotor weedWacker;
     DcMotor killer;
+    Servo gate;
     double weedWackerSpeed = 1.0;
     final double SPEED_INCREMENT = 0.01;  // Adjust this value to change the smoothness
     final double MAX_SPEED = 1.0;
@@ -42,6 +44,7 @@ public class BartholomewTeleOP extends LinearOpMode
         frontRightMotor = hardwareMap.get(DcMotor.class, "fr_motor");
         rearLeftMotor = hardwareMap.get(DcMotor.class, "rl_motor");
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
+        gate = hardwareMap.get(Servo.class, "gate");
         weedWacker = hardwareMap.get(DcMotor.class, "weedwacker");
 
         if(actuallyKilledItself)
