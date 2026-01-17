@@ -66,6 +66,7 @@ public class BartholomewAutonomous extends OpMode {
         else if (direction == AutoMovementDirection.Back){
             return (rlDistance > 20 && rrDistance > 20);
         }
+        return false;
     }
 
     @Override
@@ -73,12 +74,12 @@ public class BartholomewAutonomous extends OpMode {
         rlDistance = sensor_rl.getDistance(DistanceUnit.CM);
         rrDistance = sensor_rr.getDistance(DistanceUnit.CM);
         flDistance = sensor_fl.getDistance(DistanceUnit.CM);
-        frDistance = sensor_fr.getDistance(DistanceUnit.CM);
+        //frDistance = sensor_fr.getDistance(DistanceUnit.CM);
 
         telemetry.addData("RL Sensor Distance:", rlDistance);
         telemetry.addData("RR Sensor Distance:", rrDistance);
         telemetry.addData("FL Sensor Distance:", flDistance);
-        telemetry.addData("FR Sensor Distance:", frDistance);
+        //telemetry.addData("FR Sensor Distance:", frDistance);
         telemetry.update();
 
         if (currentMoveDirection != null){

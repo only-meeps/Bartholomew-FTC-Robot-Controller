@@ -37,6 +37,12 @@ public class BartholomewTeleOP extends LinearOpMode
     final double MAX_SPEED = 1.0;
     final double MIN_SPEED = 0.0;
 
+    final double GATE_OPEN = 0.524;
+
+    final double GATE_CLOSED = 0.197;
+
+    boolean isGateOpen = false;
+
     @Override
     public void runOpMode()
     {
@@ -69,21 +75,24 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 if(gamepad1.left_stick_button)
                 {
-                    actuallyKilledItself = true;
+                    //actuallyKilledItself = true;
+                }
+                if (gamepad1.rightStickButtonWasReleased()){
+                    isGateOpen = !isGateOpen;
                 }
                 if (rightStickX != 0)
                 {
                     rearLeftMotor.setPower(-rightStickX);
-                    frontLeftMotor.setPower(-rightStickX);
-                    frontRightMotor.setPower(-rightStickX);
-                    rearRightMotor.setPower(-rightStickX);
+                    frontLeftMotor.setPower(rightStickX);
+                    frontRightMotor.setPower(rightStickX);
+                    rearRightMotor.setPower(rightStickX);
                 }
                 else if(leftStickY != 0)
                 {
                     rearLeftMotor.setPower(-leftStickY);
                     frontLeftMotor.setPower(-leftStickY);
                     frontRightMotor.setPower(leftStickY);
-                    rearRightMotor.setPower(leftStickY);
+                    rearRightMotor.setPower(-leftStickY);
                 }
                 else
                 {
@@ -119,14 +128,14 @@ public class BartholomewTeleOP extends LinearOpMode
 
                 if (gamepad1.right_trigger > 0.3)
                 {
-                    rearLeftMotor.setPower(gamepad1.right_trigger);
+                    rearLeftMotor.setPower(-gamepad1.right_trigger);
                     frontLeftMotor.setPower(-gamepad1.right_trigger);
                     frontRightMotor.setPower(-gamepad1.right_trigger);
                     rearRightMotor.setPower(gamepad1.right_trigger);
                 }
                 if (gamepad1.left_trigger > 0.3)
                 {
-                    rearLeftMotor.setPower(-gamepad1.left_trigger);
+                    rearLeftMotor.setPower(gamepad1.left_trigger);
                     frontLeftMotor.setPower(gamepad1.left_trigger);
                     frontRightMotor.setPower(gamepad1.left_trigger);
                     rearRightMotor.setPower(-gamepad1.left_trigger);
@@ -158,6 +167,13 @@ public class BartholomewTeleOP extends LinearOpMode
                     leftPower = leftStickY + leftStickX * speed;
                     rightPower = -leftStickY + leftStickX * speed;
 
+                }
+
+                if (isGateOpen){
+                    gate.setPosition(GATE_OPEN);
+                }
+                else{
+                    gate.setPosition(GATE_CLOSED);
                 }
             }
             rearLeftMotor.setPower(0.0);
