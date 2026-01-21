@@ -25,6 +25,8 @@ public class BartholomewTeleOP extends LinearOpMode
 {
     boolean dead = false;
     boolean actuallyKilledItself = false;
+    boolean driftingRear = false;
+    boolean driftingFront = false;
     DcMotor frontLeftMotor;
     DcMotor frontRightMotor;
     DcMotor rearLeftMotor;
@@ -56,6 +58,7 @@ public class BartholomewTeleOP extends LinearOpMode
         {
             while (opModeIsActive())
             {
+                telemetry.addLine("servo " + gate.getPosition());
                 double leftStickY = gamepad1.left_stick_y;
                 double leftStickX = gamepad1.left_stick_x;
                 double rightStickX = -gamepad1.right_stick_x;
@@ -73,17 +76,45 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 if (rightStickX != 0)
                 {
-                    rearLeftMotor.setPower(-rightStickX);
-                    frontLeftMotor.setPower(-rightStickX);
-                    frontRightMotor.setPower(-rightStickX);
-                    rearRightMotor.setPower(-rightStickX);
+                    if(driftingRear)
+                    {
+                        rearRightMotor.setPower(-rightStickX);
+                        rearLeftMotor.setPower(-rightStickX);
+                    }
+                    else if(driftingFront)
+                    {
+                        frontLeftMotor.setPower(-rightStickX);
+                        frontRightMotor.setPower(-rightStickX);
+                    }
+                    else
+                    {
+                        rearLeftMotor.setPower(-rightStickX);
+                        frontLeftMotor.setPower(-rightStickX);
+                        frontRightMotor.setPower(-rightStickX);
+                        rearRightMotor.setPower(-rightStickX);
+                    }
+
                 }
                 else if(leftStickY != 0)
                 {
-                    rearLeftMotor.setPower(-leftStickY);
-                    frontLeftMotor.setPower(-leftStickY);
-                    frontRightMotor.setPower(leftStickY);
-                    rearRightMotor.setPower(leftStickY);
+                    if(driftingRear)
+                    {
+                        rearRightMotor.setPower(leftStickY);
+                        rearLeftMotor.setPower(-leftStickY);
+                    }
+                    else if(driftingFront)
+                    {
+                        frontLeftMotor.setPower(-leftStickY);
+                        frontRightMotor.setPower(leftStickY);
+                    }
+                    else
+                    {
+                        rearLeftMotor.setPower(-leftStickY);
+                        frontLeftMotor.setPower(-leftStickY);
+                        frontRightMotor.setPower(leftStickY);
+                        rearRightMotor.setPower(leftStickY);
+                    }
+
                 }
                 else
                 {
@@ -133,14 +164,31 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
 
                 //This is causing issues.
-                if (gamepad1.triangle)
+                if (gamepad1.triangleWasPressed())
                 {
-                    rearLeftMotor.setPower(1);
-                    frontLeftMotor.setPower(1);
-                    rearRightMotor.setPower(-1);
-                    frontRightMotor.setPower(-1);
+                    if(driftingFront)
+                    {
+                        driftingFront = false;
+                    }
+                    driftingRear = !driftingRear;
                 }
+                if(gamepad1.squareWasPressed())
+                {
+                    if(driftingRear)
+                    {
+                        driftingRear = false;
+                    }
 
+                    driftingFront = !driftingFront;
+                }
+                if(driftingFront)
+                {
+                    telemetry.addLine("Drifting Front");
+                }
+                if(driftingRear)
+                {
+                    telemetry.addLine("Drifting Rear");
+                }
                 if (gamepad1.dpad_right)
                 {
                     double speed = 0.5;
