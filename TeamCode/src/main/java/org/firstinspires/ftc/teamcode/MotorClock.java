@@ -26,7 +26,7 @@ public class MotorClock extends LinearOpMode {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("America/Los_Angeles"));
         int secondsWithinMinute = calendar.get(Calendar.SECOND);
         clockMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        clockMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        clockMotor.setMode(DcMotor.RunMode.RUN_);
 
         int secondStep = ticksPerRevolution / 60;
         while (opModeIsActive()) {
