@@ -1,159 +1,103 @@
-/*
-Copyright (c) 2023 FIRST
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted (subject to the limitations in the disclaimer below) provided that
-the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list
-of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-Neither the name of FIRST nor the names of its contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import java.util.concurrent.TimeUnit;
-
-/*
- * This OpMode illustrates how to use the DFRobot HuskyLens.
- *
- * The HuskyLens is a Vision Sensor with a built-in object detection model.  It can
- * detect a number of predefined objects and AprilTags in the 36h11 family, can
- * recognize colors, and can be trained to detect custom objects. See this website for
- * documentation: https://wiki.dfrobot.com/HUSKYLENS_V1.0_SKU_SEN0305_SEN0336
- *
- * For detailed instructions on how a HuskyLens is used in FTC, please see this tutorial:
- * https://ftc-docs.firstinspires.org/en/latest/devices/huskylens/huskylens.html
- *
- * This sample illustrates how to detect AprilTags, but can be used to detect other types
- * of objects by changing the algorithm. It assumes that the HuskyLens is configured with
- * a name of "huskylens".
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
-@Autonomous(name = "BartholomewAutomonousMk2")
+@TeleOp(name = "HuskyLens Field Positioning")
 public class BartholomewAutonomousMk2 extends LinearOpMode {
 
-    private final int READ_PERIOD = 1;
-
     private HuskyLens huskyLens;
+    private BNO055IMU imu;
+
+    // --- CONFIGURATION CONSTANTS ---
+    // You must calibrate these! See instructions below.
+    // Ideally, place the robot exactly 10 inches from a tag and measure the pixel width.
+    // FOCAL_LENGTH = (PixelWidth * DistanceInches) / RealTagWidthInches
+    // Example: (50 pixels * 10 inches) / 2 inches = 250
+    private final double FOCAL_LENGTH_PIXELS = 220.0;
+    private final double REAL_TAG_WIDTH_INCHES = 2.0; // Standard small AprilTags are 2 inches
+
+    // The center of the HuskyLens image (320x240 resolution)
+    private final double IMAGE_CENTER_X = 160.0;
 
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
+        // 1. Initialize HuskyLens
         huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-        telemetry.addLine("Bart");
-        /*
-         * This sample rate limits the reads solely to allow a user time to observe
-         * what is happening on the Driver Station telemetry.  Typical applications
-         * would not likely rate limit.
-         */
-        Deadline rateLimit = new Deadline(READ_PERIOD, TimeUnit.SECONDS);
 
-        /*
-         * Immediately expire so that the first time through we'll do the read.
-         */
-        rateLimit.expire();
+        // 2. Initialize IMU (Gyro) inside the Control Hub
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(parameters);
 
-        /*
-         * Basic check to see if the device is alive and communicating.  This is not
-         * technically necessary here as the HuskyLens class does this in its
-         * doInitialization() method which is called when the device is pulled out of
-         * the hardware map.  However, sometimes it's unclear why a device reports as
-         * failing on initialization.  In the case of this device, it's because the
-         * call to knock() failed.
-         */
         if (!huskyLens.knock()) {
             telemetry.addData(">>", "Problem communicating with " + huskyLens.getDeviceName());
         } else {
+            huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
             telemetry.addData(">>", "Press start to continue");
         }
-
-        /*
-         * The device uses the concept of an algorithm to determine what types of
-         * objects it will look for and/or what mode it is in.  The algorithm may be
-         * selected using the scroll wheel on the device, or via software as shown in
-         * the call to selectAlgorithm().
-         *
-         * The SDK itself does not assume that the user wants a particular algorithm on
-         * startup, and hence does not set an algorithm.
-         *
-         * Users, should, in general, explicitly choose the algorithm they want to use
-         * within the OpMode by calling selectAlgorithm() and passing it one of the values
-         * found in the enumeration HuskyLens.Algorithm.
-         *
-         * Other algorithm choices for FTC might be: OBJECT_RECOGNITION, COLOR_RECOGNITION or OBJECT_CLASSIFICATION.
-         */
-        huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
-
         telemetry.update();
+
         waitForStart();
 
-        /*
-         * Looking for AprilTags per the call to selectAlgorithm() above.  A handy grid
-         * for testing may be found at https://wiki.dfrobot.com/HUSKYLENS_V1.0_SKU_SEN0305_SEN0336#target_20.
-         *
-         * Note again that the device only recognizes the 36h11 family of tags out of the box.
-         */
-        while(opModeIsActive()) {
-            if (!rateLimit.hasExpired()) {
-                continue;
-            }
-            rateLimit.reset();
-
-            /*
-             * All algorithms, except for LINE_TRACKING, return a list of Blocks where a
-             * Block represents the outline of a recognized object along with its ID number.
-             * ID numbers allow you to identify what the device saw.  See the HuskyLens documentation
-             * referenced in the header comment above for more information on IDs and how to
-             * assign them to objects.
-             *
-             * Returns an empty array if no objects are seen.
-             */
+        while (opModeIsActive()) {
             HuskyLens.Block[] blocks = huskyLens.blocks();
+
+            // Get Robot Heading from IMU
+            Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double robotHeading = angles.firstAngle;
+
+            telemetry.addData("Robot Heading", "%.1f deg", robotHeading);
             telemetry.addData("Block count", blocks.length);
+
             for (int i = 0; i < blocks.length; i++) {
-                telemetry.addData("Block", blocks[i].toString());
-                    double tagX = blocks[i].x;
-                    double tagY = blocks[i].y;
-                    double tagWidth = blocks[i].width;
-                    double tagHeight = blocks[i].height;
-                    double distortionX = blocks[i].y - blocks[i].x;
-                    double distortionY = blocks[i].x - blocks[i].y;
-                    telemetry.addData("Block distortion X", distortionX);
-                    telemetry.addData("Block distortion Y", distortionY);
+                // --- MATH SECTION ---
 
+                // 1. Calculate Distance (d)
+                // The closer the tag, the wider it looks in pixels.
+                double detectedWidth = blocks[i].width;
+                double distanceFromTag = (FOCAL_LENGTH_PIXELS * REAL_TAG_WIDTH_INCHES) / detectedWidth;
+
+                // 2. Calculate Bearing (theta)
+                // How far left/right is the tag from the center of the screen?
+                // We assume a Field of View (FOV) roughly related to coordinates.
+                // HuskyLens X goes 0 to 320.
+                double xOffset = blocks[i].x - IMAGE_CENTER_X;
+                // A rough approximation: 1 pixel approx 0.18 degrees (depends on lens)
+                double bearingToTag = xOffset * -0.18;
+
+                // 3. Calculate Field Position (Simple 1-Tag Example)
+                // We need to know WHICH tag this is to know where we are.
+                // Let's assume Tag ID 1 is at Field Position (0, 72) (Center of back wall)
+                double tagFieldX = 0;
+                double tagFieldY = 72;
+
+                if(blocks[i].id == 1) {
+                    // Calculate absolute angle of the vector from Robot to Tag
+                    double absoluteAngleToTag = robotHeading + bearingToTag;
+
+                    // Convert polar coordinates (distance, angle) to Cartesian (x, y) offset
+                    double xOffsetFromTag = distanceFromTag * Math.sin(Math.toRadians(absoluteAngleToTag));
+                    double yOffsetFromTag = distanceFromTag * Math.cos(Math.toRadians(absoluteAngleToTag));
+
+                    // Robot Position = Tag Position - Offset
+                    double robotX = tagFieldX - xOffsetFromTag;
+                    double robotY = tagFieldY - yOffsetFromTag;
+
+                    telemetry.addData("--- Tag Detected", "ID: %d", blocks[i].id);
+                    telemetry.addData("Dist to Tag", "%.2f in", distanceFromTag);
+                    telemetry.addData("Bearing", "%.2f deg", bearingToTag);
+                    telemetry.addData("Calculated Pos", "X: %.1f, Y: %.1f", robotX, robotY);
+                }
             }
-
             telemetry.update();
         }
     }
