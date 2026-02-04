@@ -30,9 +30,10 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -51,7 +52,7 @@ import java.util.concurrent.TimeUnit;
  *
  * For detailed instructions on how a HuskyLens is used in FTC, please see this tutorial:
  * https://ftc-docs.firstinspires.org/en/latest/devices/huskylens/huskylens.html
- * 
+ *
  * This sample illustrates how to detect AprilTags, but can be used to detect other types
  * of objects by changing the algorithm. It assumes that the HuskyLens is configured with
  * a name of "huskylens".
@@ -59,8 +60,8 @@ import java.util.concurrent.TimeUnit;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
-@TeleOp(name = "Sensor: HuskyLens", group = "Sensor")
-public class SensorHuskyLens extends LinearOpMode {
+@Autonomous(name = "BartholomewAutomonousMk2")
+public class BartholomewAutonomousMk2 extends LinearOpMode {
 
     private final int READ_PERIOD = 1;
 
@@ -70,7 +71,7 @@ public class SensorHuskyLens extends LinearOpMode {
     public void runOpMode()
     {
         huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
-
+        telemetry.addLine("Bart");
         /*
          * This sample rate limits the reads solely to allow a user time to observe
          * what is happening on the Driver Station telemetry.  Typical applications
@@ -138,10 +139,20 @@ public class SensorHuskyLens extends LinearOpMode {
              *
              * Returns an empty array if no objects are seen.
              */
-            HuskyLens.Block[] blocks = huskyLens.blocks(1);
+            HuskyLens.Block[] blocks = huskyLens.blocks();
             telemetry.addData("Block count", blocks.length);
+            for (int i = 0; i < blocks.length; i++) {
+                telemetry.addData("Block", blocks[i].toString());
+                    double tagX = blocks[i].x;
+                    double tagY = blocks[i].y;
+                    double tagWidth = blocks[i].width;
+                    double tagHeight = blocks[i].height;
+                    double distortionX = blocks[i].y - blocks[i].x;
+                    double distortionY = blocks[i].x - blocks[i].y;
+                    telemetry.addData("Block distortion X", distortionX);
+                    telemetry.addData("Block distortion Y", distortionY);
 
-
+            }
 
             telemetry.update();
         }
