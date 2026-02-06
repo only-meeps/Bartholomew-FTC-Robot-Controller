@@ -1,44 +1,14 @@
-/*
-Copyright (c) 2023 FIRST
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted (subject to the limitations in the disclaimer below) provided that
-the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list
-of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-Neither the name of FIRST nor the names of its contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import java.util.concurrent.TimeUnit;
 @Autonomous(name = "BartholomewAutomonousMk2")
@@ -52,10 +22,22 @@ public class BartholomewAutonomousMk2 extends LinearOpMode {
     private final int minXSize = 210;
     private final int minYSize = 210;
     private HuskyLens huskyLens;
+    private BNO055IMU imu;
+
+    // --- CONFIGURATION CONSTANTS ---
+    // You must calibrate these! See instructions below.
+    // Ideally, place the robot exactly 10 inches from a tag and measure the pixel width.
+    // FOCAL_LENGTH = (PixelWidth * DistanceInches) / RealTagWidthInches
+    // Example: (50 pixels * 10 inches) / 2 inches = 250
+    private final double FOCAL_LENGTH_PIXELS = 220.0;
+    private final double REAL_TAG_WIDTH_INCHES = 2.0; // Standard small AprilTags are 2 inches
+
+    // The center of the HuskyLens image (320x240 resolution)
+    private final double IMAGE_CENTER_X = 160.0;
 
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
+        // 1. Initialize HuskyLens
         huskyLens = hardwareMap.get(HuskyLens.class, "huskylens");
         telemetry.addLine("Bart");
 
@@ -67,12 +49,14 @@ public class BartholomewAutonomousMk2 extends LinearOpMode {
         if (!huskyLens.knock()) {
             telemetry.addData(">>", "Problem communicating with " + huskyLens.getDeviceName());
         } else {
+            huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
             telemetry.addData(">>", "Press start to continue");
         }
 
         huskyLens.selectAlgorithm(HuskyLens.Algorithm.TAG_RECOGNITION);
 
         telemetry.update();
+
         waitForStart();
 
         while(opModeIsActive()) {
@@ -81,6 +65,12 @@ public class BartholomewAutonomousMk2 extends LinearOpMode {
             }
             rateLimit.reset();
             HuskyLens.Block[] blocks = huskyLens.blocks();
+
+            // Get Robot Heading from IMU
+            Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double robotHeading = angles.firstAngle;
+
+            telemetry.addData("Robot Heading", "%.1f deg", robotHeading);
             telemetry.addData("Block count", blocks.length);
 
             if(blocks.length > 0){
@@ -99,7 +89,6 @@ public class BartholomewAutonomousMk2 extends LinearOpMode {
                 telemetry.addData("Block distortion X", distortionX);
                 telemetry.addData("Block distance", distance);
             }
-
             telemetry.update();
         }
     }
