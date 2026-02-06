@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -9,6 +10,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import java.util.concurrent.TimeUnit;
 @Autonomous(name = "BartholomewAutomonousMk2")
@@ -83,6 +85,7 @@ public class BartholomewAutonomousMk2 extends LinearOpMode {
                 double tagWidth = blocks[i].width;
                 double tagHeight = blocks[i].height;
                 double distortionX = blocks[i].height - blocks[i].width;
+                //Angle
                 distortionX = (distortionX * 360) / 320;
                 double distance = ((distortionX * blocks[i].width) / minXSize) * minDistance;
 
