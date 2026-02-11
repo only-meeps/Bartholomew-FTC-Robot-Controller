@@ -1,7 +1,4 @@
 package org.firstinspires.ftc.teamcode;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,19 +28,11 @@ public class BartholomewTeleOP extends LinearOpMode
     DcMotor frontRightMotor;
     DcMotor rearLeftMotor;
     DcMotor rearRightMotor;
-    DcMotor weedWacker;
     DcMotor killer;
-    Servo gate;
-    double weedWackerSpeed = 1.0;
     final double SPEED_INCREMENT = 0.01;  // Adjust this value to change the smoothness
     final double MAX_SPEED = 1.0;
     final double MIN_SPEED = 0.0;
-
-    final double GATE_OPEN = 0.524;
-
-    final double GATE_CLOSED = 0.197;
-
-    boolean isGateOpen = false;
+    boolean omniMode = false;
 
     @Override
     public void runOpMode()
@@ -52,8 +41,6 @@ public class BartholomewTeleOP extends LinearOpMode
         frontRightMotor = hardwareMap.get(DcMotor.class, "fr_motor");
         rearLeftMotor = hardwareMap.get(DcMotor.class, "rl_motor");
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
-        gate = hardwareMap.get(Servo.class, "gate");
-        weedWacker = hardwareMap.get(DcMotor.class, "weedwacker");
 
         if(actuallyKilledItself)
         {
@@ -64,7 +51,6 @@ public class BartholomewTeleOP extends LinearOpMode
         {
             while (opModeIsActive())
             {
-                telemetry.addLine("servo " + gate.getPosition());
                 double leftStickY = gamepad1.left_stick_y;
                 double leftStickX = gamepad1.left_stick_x;
                 double rightStickX = -gamepad1.right_stick_x;
@@ -80,81 +66,66 @@ public class BartholomewTeleOP extends LinearOpMode
                 {
                     //actuallyKilledItself = true;
                 }
-                if (gamepad1.rightStickButtonWasReleased()){
-                    isGateOpen = !isGateOpen;
-                }
-                if (rightStickX != 0)
+                if(!omniMode)
                 {
-                    if(driftingRear)
+                    if (rightStickX != 0)
                     {
-                        rearRightMotor.setPower(-rightStickX);
-                        rearLeftMotor.setPower(-rightStickX);
+
+                        if(driftingRear)
+                        {
+                            rearRightMotor.setPower(-rightStickX);
+                            rearLeftMotor.setPower(-rightStickX);
+                        }
+                        else if(driftingFront)
+                        {
+                            frontLeftMotor.setPower(-rightStickX);
+                            frontRightMotor.setPower(-rightStickX);
+                        }
+                        else
+                        {
+                            rearLeftMotor.setPower(-rightStickX);
+                            frontLeftMotor.setPower(-rightStickX);
+                            frontRightMotor.setPower(-rightStickX);
+                            rearRightMotor.setPower(-rightStickX);
+                        }
+
                     }
-                    else if(driftingFront)
+                    else if(leftStickY != 0)
                     {
-                        frontLeftMotor.setPower(-rightStickX);
-                        frontRightMotor.setPower(-rightStickX);
+                        if(driftingRear)
+                        {
+                            rearRightMotor.setPower(leftStickY);
+                            rearLeftMotor.setPower(-leftStickY);
+                        }
+                        else if(driftingFront)
+                        {
+                            frontLeftMotor.setPower(-leftStickY);
+                            frontRightMotor.setPower(leftStickY);
+                        }
+                        else
+                        {
+                            rearLeftMotor.setPower(-leftStickY);
+                            frontLeftMotor.setPower(-leftStickY);
+                            frontRightMotor.setPower(leftStickY);
+                            rearRightMotor.setPower(leftStickY);
+                        }
+
                     }
                     else
                     {
-                        rearLeftMotor.setPower(-rightStickX);
-                        frontLeftMotor.setPower(-rightStickX);
-                        frontRightMotor.setPower(-rightStickX);
-                        rearRightMotor.setPower(-rightStickX);
+                        rearLeftMotor.setPower(0);
+                        frontLeftMotor.setPower(0);
+                        frontRightMotor.setPower(0);
+                        rearRightMotor.setPower(0);
                     }
-
-                }
-                else if(leftStickY != 0)
-                {
-                    if(driftingRear)
-                    {
-                        rearRightMotor.setPower(leftStickY);
-                        rearLeftMotor.setPower(-leftStickY);
-                    }
-                    else if(driftingFront)
-                    {
-                        frontLeftMotor.setPower(-leftStickY);
-                        frontRightMotor.setPower(leftStickY);
-                    }
-                    else
-                    {
-                        rearLeftMotor.setPower(-leftStickY);
-                        frontLeftMotor.setPower(-leftStickY);
-                        frontRightMotor.setPower(leftStickY);
-                        rearRightMotor.setPower(leftStickY);
-                    }
-
                 }
                 else
                 {
-                    rearLeftMotor.setPower(0);
-                    frontLeftMotor.setPower(0);
-                    frontRightMotor.setPower(0);
-                    rearRightMotor.setPower(0);
-                }
-                if (gamepad1.right_bumper)
-                {
-                    weedWacker.setPower(weedWackerSpeed);
-                }
-                else if (gamepad1.left_bumper)
-                {
-                    weedWacker.setPower(-weedWackerSpeed);
-                }
-                else
-                {
-                    weedWacker.setPower(0.0);
-                }
 
-                //Smooth speed changes
-                if (gamepad1.dpad_up && weedWackerSpeed < MAX_SPEED)
-                {
-                    weedWackerSpeed += SPEED_INCREMENT;
-                    weedWackerSpeed = Math.min(weedWackerSpeed, MAX_SPEED); //Ensure it doesn't exceed max
                 }
-                else if (gamepad1.dpad_down && weedWackerSpeed > MIN_SPEED)
+                if(gamepad1.crossWasPressed())
                 {
-                    weedWackerSpeed -= SPEED_INCREMENT;
-                    weedWackerSpeed = Math.max(weedWackerSpeed, MIN_SPEED); //Ensure it doesn't go below min
+                    omniMode = !omniMode;
                 }
 
                 if (gamepad1.right_trigger > 0.3)
@@ -215,13 +186,6 @@ public class BartholomewTeleOP extends LinearOpMode
                     leftPower = leftStickY + leftStickX * speed;
                     rightPower = -leftStickY + leftStickX * speed;
 
-                }
-
-                if (isGateOpen){
-                    gate.setPosition(GATE_OPEN);
-                }
-                else{
-                    gate.setPosition(GATE_CLOSED);
                 }
             }
             rearLeftMotor.setPower(0.0);
