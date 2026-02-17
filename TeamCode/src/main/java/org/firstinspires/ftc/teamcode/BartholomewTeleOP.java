@@ -4,19 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-/*
- * This OpMode ramps a single motor speed up and down repeatedly until Stop is pressed.
- * The code is structured as a LinearOpMode
- *
- * This code assumes a DC motor configured with the name "left_drive" as is found on a Robot.
- *
- * INCREMENT sets how much to increase/decrease the power each cycle
- * CYCLE_MS sets the update period.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
- */
-@TeleOp(name = "BartholomewTeleOPl")
+@TeleOp(name = "BartholomewTeleOP")
 
 public class BartholomewTeleOP extends LinearOpMode
 {
@@ -34,13 +22,17 @@ public class BartholomewTeleOP extends LinearOpMode
     final double MIN_SPEED = 0.0;
     boolean omniMode = false;
 
+
+
     @Override
     public void runOpMode()
     {
+        telemetry.addLine("Test");
         frontLeftMotor = hardwareMap.get(DcMotor.class, "fl_motor");
         frontRightMotor = hardwareMap.get(DcMotor.class, "fr_motor");
         rearLeftMotor = hardwareMap.get(DcMotor.class, "rl_motor");
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
+
 
         if(actuallyKilledItself)
         {
@@ -55,9 +47,27 @@ public class BartholomewTeleOP extends LinearOpMode
                 double leftStickX = gamepad1.left_stick_x;
                 double rightStickX = -gamepad1.right_stick_x;
                 double rightStickY = gamepad1.right_stick_y;
-
+                double theta = Math.atan2(leftStickX, leftStickY);
+                double magnitude = Math.hypot(leftStickX, leftStickY);
                 double leftPower = leftStickY + leftStickX;
                 double rightPower = -leftStickY + leftStickX;
+                double rX = gamepad1.right_stick_x;
+                double flbr = magnitude * Math.sin(theta + (0.25 * Math.PI));
+                double frbl = magnitude * Math.sin(theta - (0.25 * Math.PI));
+
+                double fr = frbl + rX;
+                double fl = flbr - rX;
+                double br = flbr - rX;
+                double bl = frbl + rX;
+
+                double max = 1;
+                double denominator = Math.max(Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(br), Math.abs(bl))), 1);
+
+
+                fr /= denominator;
+                fl /= denominator;
+                br /= denominator;
+                bl /= denominator;
                 if(actuallyKilledItself)
                 {
                     killer = hardwareMap.get(DcMotor.class, "you have been fucked haha");
@@ -68,6 +78,7 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 if(!omniMode)
                 {
+                    telemetry.addLine("Omnimode off");
                     if (rightStickX != 0)
                     {
 
@@ -121,7 +132,11 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 else
                 {
-
+                    telemetry.addLine("Omnimode on");
+                    frontRightMotor.setPower(fr);
+                    frontLeftMotor.setPower(fl);
+                    rearRightMotor.setPower(br);
+                    rearLeftMotor.setPower(bl);
                 }
                 if(gamepad1.crossWasPressed())
                 {
@@ -187,6 +202,7 @@ public class BartholomewTeleOP extends LinearOpMode
                     rightPower = -leftStickY + leftStickX * speed;
 
                 }
+                telemetry.update();
             }
             rearLeftMotor.setPower(0.0);
             frontLeftMotor.setPower(0.0);
