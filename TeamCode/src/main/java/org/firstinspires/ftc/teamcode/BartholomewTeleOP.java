@@ -1,8 +1,12 @@
 package org.firstinspires.ftc.teamcode;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "BartholomewTeleOP")
 
@@ -17,6 +21,7 @@ public class BartholomewTeleOP extends LinearOpMode
     DcMotor rearLeftMotor;
     DcMotor rearRightMotor;
     DcMotor killer;
+    IMU imu;
     final double SPEED_INCREMENT = 0.01;  // Adjust this value to change the smoothness
     final double MAX_SPEED = 1.0;
     final double MIN_SPEED = 0.0;
@@ -32,6 +37,12 @@ public class BartholomewTeleOP extends LinearOpMode
         frontRightMotor = hardwareMap.get(DcMotor.class, "fr_motor");
         rearLeftMotor = hardwareMap.get(DcMotor.class, "rl_motor");
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
+        imu = hardwareMap.get(IMU.class, "imu");
+
+        IMU.Parameters parameters = new IMU.Parameters(
+                new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                        RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+        imu.initialize(parameters);
 
 
         if(actuallyKilledItself)
@@ -47,17 +58,18 @@ public class BartholomewTeleOP extends LinearOpMode
                 double leftStickX = gamepad1.left_stick_x;
                 double rightStickX = -gamepad1.right_stick_x;
                 double rightStickY = gamepad1.right_stick_y;
-                double theta = Math.atan2(leftStickX, leftStickY);
-                double magnitude = Math.hypot(leftStickX, leftStickY);
-                double leftPower = leftStickY + leftStickX;
-                double rightPower = -leftStickY + leftStickX;
-                double rX = gamepad1.right_stick_x;
+                double theta = Math.atan2(-leftStickX, leftStickY);
+                theta += imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                double magnitude = Math.hypot(-leftStickX, leftStickY);
+                double leftPower = leftStickY - leftStickX;
+                double rightPower = -leftStickY - leftStickX;
+                double rX = -gamepad1.right_stick_x;
                 double flbr = magnitude * Math.sin(theta + (0.25 * Math.PI));
                 double frbl = magnitude * Math.sin(theta - (0.25 * Math.PI));
 
                 double fr = frbl + rX;
-                double fl = flbr - rX;
-                double br = flbr - rX;
+                double fl = flbr + rX;
+                double br = flbr + rX;
                 double bl = frbl + rX;
 
                 double max = 1;
@@ -135,8 +147,8 @@ public class BartholomewTeleOP extends LinearOpMode
                     telemetry.addLine("Omnimode on");
                     frontRightMotor.setPower(fr);
                     frontLeftMotor.setPower(fl);
-                    rearRightMotor.setPower(br);
-                    rearLeftMotor.setPower(bl);
+                    rearRightMotor.setPower(-br);
+                    rearLeftMotor.setPower(-bl);
                 }
                 if(gamepad1.crossWasPressed())
                 {
@@ -202,6 +214,9 @@ public class BartholomewTeleOP extends LinearOpMode
                     rightPower = -leftStickY + leftStickX * speed;
 
                 }
+
+                if (gamepad1.backWasPressed()) { imu.resetYaw(); }
+
                 telemetry.update();
             }
             rearLeftMotor.setPower(0.0);
