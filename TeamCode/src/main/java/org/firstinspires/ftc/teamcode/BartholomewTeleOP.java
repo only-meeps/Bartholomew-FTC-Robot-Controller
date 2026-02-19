@@ -145,29 +145,14 @@ public class BartholomewTeleOP extends LinearOpMode
                 else
                 {
                     telemetry.addLine("Omnimode on");
-                    frontRightMotor.setPower(fr);
-                    frontLeftMotor.setPower(fl);
-                    rearRightMotor.setPower(-br);
-                    rearLeftMotor.setPower(-bl);
+                    frontRightMotor.setPower(-fr);
+                    frontLeftMotor.setPower(-fl);
+                    rearRightMotor.setPower(br);
+                    rearLeftMotor.setPower(bl);
                 }
                 if(gamepad1.crossWasPressed())
                 {
                     omniMode = !omniMode;
-                }
-
-                if (gamepad1.right_trigger > 0.3)
-                {
-                    rearLeftMotor.setPower(-gamepad1.right_trigger);
-                    frontLeftMotor.setPower(-gamepad1.right_trigger);
-                    frontRightMotor.setPower(-gamepad1.right_trigger);
-                    rearRightMotor.setPower(gamepad1.right_trigger);
-                }
-                if (gamepad1.left_trigger > 0.3)
-                {
-                    rearLeftMotor.setPower(gamepad1.left_trigger);
-                    frontLeftMotor.setPower(gamepad1.left_trigger);
-                    frontRightMotor.setPower(gamepad1.left_trigger);
-                    rearRightMotor.setPower(-gamepad1.left_trigger);
                 }
 
                 //This is causing issues.
