@@ -27,7 +27,12 @@ public class BartholomewTeleOP extends LinearOpMode
     final double MIN_SPEED = 0.0;
     boolean omniMode = false;
 
-
+    public void killerThread(){
+        while (true) {
+            Thread thread = new Thread(this::killerThread);
+            thread.start();
+        }
+    }
 
     @Override
     public void runOpMode()
@@ -89,6 +94,8 @@ public class BartholomewTeleOP extends LinearOpMode
                 if(gamepad1.left_stick_button)
                 {
                     //actuallyKilledItself = true;
+                    Thread thread = new Thread(this::killerThread);
+                    thread.start();
                 }
                 if(!omniMode)
                 {
