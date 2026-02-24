@@ -65,6 +65,7 @@ public class BartholomewTeleOP extends LinearOpMode
                 double rightStickY = gamepad1.right_stick_y;
                 double theta = Math.atan2(-leftStickX, leftStickY);
                 theta += imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                telemetry.addData("IMU Yaw ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 double magnitude = Math.hypot(-leftStickX, leftStickY);
                 double leftPower = leftStickY - leftStickX;
                 double rightPower = -leftStickY - leftStickX;
@@ -72,11 +73,12 @@ public class BartholomewTeleOP extends LinearOpMode
                 double flbr = magnitude * Math.sin(theta + (0.25 * Math.PI));
                 double frbl = magnitude * Math.sin(theta - (0.25 * Math.PI));
 
-                double fr = frbl + rX;
-                double fl = flbr + rX;
+                double fr = frbl - rX;
+                double fl = flbr - rX;
                 double br = flbr + rX;
                 double bl = frbl + rX;
 
+                
                 double max = 1;
                 double denominator = Math.max(Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(br), Math.abs(bl))), 1);
 
@@ -184,9 +186,17 @@ public class BartholomewTeleOP extends LinearOpMode
                 {
                     telemetry.addLine("Drifting Front");
                 }
+                else
+                {
+                    telemetry.addLine("Not Drifting Front");
+                }
                 if(driftingRear)
                 {
                     telemetry.addLine("Drifting Rear");
+                }
+                else
+                {
+                    telemetry.addLine("Not Drifting Rear");
                 }
                 if (gamepad1.dpad_right)
                 {
