@@ -51,10 +51,7 @@ public class BartholomewTeleOP extends LinearOpMode
                 new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(parameters);
-        double fr = 0;
-        double fl = 0;
-        double br = 0;
-        double bl = 0;
+
 
         if(actuallyKilledItself)
         {
@@ -65,6 +62,10 @@ public class BartholomewTeleOP extends LinearOpMode
         {
             while (opModeIsActive())
             {
+                double fr = 0;
+                double fl = 0;
+                double br = 0;
+                double bl = 0;
                 double leftStickY = gamepad1.left_stick_y;
                 double leftStickX = gamepad1.left_stick_x;
                 double rightStickX = -gamepad1.right_stick_x;
@@ -99,20 +100,15 @@ public class BartholomewTeleOP extends LinearOpMode
                     telemetry.addLine("Omnimode off");
                     if (rightStickX != 0)
                     {
-
                         if(driftingRear)
                         {
-
                             br = rightStickX;
                             bl = rightStickX;
-
-
                         }
                         else if(driftingFront)
                         {
                             fr = rightStickX;
                             fl = rightStickX;
-
                         }
                         else
                         {
@@ -120,17 +116,21 @@ public class BartholomewTeleOP extends LinearOpMode
                             fl = rightStickX;
                             fr = rightStickX;
                             br = rightStickX;
-
                         }
-
                     }
                     else if(leftStickY != 0)
                     {
-                        bl = rightStickY;
-                        fl = rightStickY;
-                        fr = rightStickY;
-                        br = rightStickY;
-
+                        bl = leftStickY;
+                        fl = leftStickY;
+                        fr = leftStickY;
+                        br = leftStickY;
+                    }
+                    else
+                    {
+                        fl = 0;
+                        bl = 0;
+                        br = 0;
+                        fr = 0;
                     }
                 }
                 else
@@ -240,10 +240,10 @@ public class BartholomewTeleOP extends LinearOpMode
                 if (gamepad1.backWasPressed()) { imu.resetYaw(); }
                 telemetry.addData("Speed", speed);
                 telemetry.update();
-                frontRightMotor.setPower(-fr * speed);
-                frontLeftMotor.setPower(-fl * speed);
-                rearRightMotor.setPower(br * speed);
-                rearLeftMotor.setPower(bl * speed);
+                frontRightMotor.setPower(fr);
+                frontLeftMotor.setPower(fl);
+                rearRightMotor.setPower(br);
+                rearLeftMotor.setPower(bl);
             }
         }
     }
