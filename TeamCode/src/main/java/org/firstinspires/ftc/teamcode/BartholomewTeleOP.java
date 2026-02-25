@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "BartholomewTeleOP")
+@TeleOp(name = "BartholomewTeleOPA")
 
 public class BartholomewTeleOP extends LinearOpMode
 {
@@ -102,8 +102,8 @@ public class BartholomewTeleOP extends LinearOpMode
                     {
                         if(driftingRear)
                         {
-                            br = rightStickX;
-                            bl = rightStickX;
+                            br = -rightStickX;
+                            bl = -rightStickX;
                         }
                         else if(driftingFront)
                         {
@@ -112,8 +112,8 @@ public class BartholomewTeleOP extends LinearOpMode
                         }
                         else
                         {
-                            bl = rightStickX;
-                            fl = rightStickX;
+                            bl = -rightStickX;
+                            fl = -rightStickX;
                             fr = rightStickX;
                             br = rightStickX;
                         }

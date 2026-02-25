@@ -17,7 +17,7 @@ public class Wheelie extends LinearOpMode {
                 new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(parameters);
-
+        waitForStart();
         while (opModeIsActive()) {
             YawPitchRollAngles yawPitchRollAngles = imu.getRobotYawPitchRollAngles();
             telemetry.addLine("IMU initialized.");
