@@ -26,9 +26,12 @@ public class BartholomewTeleOP extends LinearOpMode
     final double MAX_SPEED = 1.0;
     final double MIN_SPEED = 0.0;
     boolean omniMode = false;
-
+    boolean omniModeIMU = true;
+    boolean braking = false;
+    double speed = 1.0;
     public void killerThread(){
         while (true) {
+            telemetry.addLine("Creating new thread...");
             Thread thread = new Thread(this::killerThread);
             thread.start();
         }
@@ -48,7 +51,10 @@ public class BartholomewTeleOP extends LinearOpMode
                 new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP,
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(parameters);
-
+        double fr = 0;
+        double fl = 0;
+        double br = 0;
+        double bl = 0;
 
         if(actuallyKilledItself)
         {
@@ -64,7 +70,12 @@ public class BartholomewTeleOP extends LinearOpMode
                 double rightStickX = -gamepad1.right_stick_x;
                 double rightStickY = gamepad1.right_stick_y;
                 double theta = Math.atan2(-leftStickX, leftStickY);
-                theta += imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                if(omniModeIMU)
+                {
+                    theta += imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                }
+
+
                 telemetry.addData("IMU Yaw ", imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS));
                 double magnitude = Math.hypot(-leftStickX, leftStickY);
                 double leftPower = leftStickY - leftStickX;
@@ -73,27 +84,13 @@ public class BartholomewTeleOP extends LinearOpMode
                 double flbr = magnitude * Math.sin(theta + (0.25 * Math.PI));
                 double frbl = magnitude * Math.sin(theta - (0.25 * Math.PI));
 
-                double fr = frbl - rX;
-                double fl = flbr - rX;
-                double br = flbr + rX;
-                double bl = frbl + rX;
 
-                
-                double max = 1;
-                double denominator = Math.max(Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(br), Math.abs(bl))), 1);
-
-
-                fr /= denominator;
-                fl /= denominator;
-                br /= denominator;
-                bl /= denominator;
                 if(actuallyKilledItself)
                 {
                     killer = hardwareMap.get(DcMotor.class, "you have been fucked haha");
                 }
                 if(gamepad1.left_stick_button)
                 {
-                    //actuallyKilledItself = true;
                     Thread thread = new Thread(this::killerThread);
                     thread.start();
                 }
@@ -105,66 +102,65 @@ public class BartholomewTeleOP extends LinearOpMode
 
                         if(driftingRear)
                         {
-                            rearRightMotor.setPower(-rightStickX);
-                            rearLeftMotor.setPower(-rightStickX);
+
+                            br = rightStickX;
+                            bl = rightStickX;
+
+
                         }
                         else if(driftingFront)
                         {
-                            frontLeftMotor.setPower(-rightStickX);
-                            frontRightMotor.setPower(-rightStickX);
+                            fr = rightStickX;
+                            fl = rightStickX;
+
                         }
                         else
                         {
-                            rearLeftMotor.setPower(rightStickX);
-                            frontLeftMotor.setPower(rightStickX);
-                            frontRightMotor.setPower(rightStickX);
-                            rearRightMotor.setPower(rightStickX);
+                            bl = rightStickX;
+                            fl = rightStickX;
+                            fr = rightStickX;
+                            br = rightStickX;
+
                         }
 
                     }
                     else if(leftStickY != 0)
                     {
-                        if(driftingRear)
-                        {
-                            rearRightMotor.setPower(leftStickY);
-                            rearLeftMotor.setPower(-leftStickY);
-                        }
-                        else if(driftingFront)
-                        {
-                            frontLeftMotor.setPower(-leftStickY);
-                            frontRightMotor.setPower(leftStickY);
-                        }
-                        else
-                        {
-                            rearLeftMotor.setPower(-leftStickY);
-                            frontLeftMotor.setPower(-leftStickY);
-                            frontRightMotor.setPower(leftStickY);
-                            rearRightMotor.setPower(leftStickY);
-                        }
+                        bl = rightStickY;
+                        fl = rightStickY;
+                        fr = rightStickY;
+                        br = rightStickY;
 
-                    }
-                    else
-                    {
-                        rearLeftMotor.setPower(0);
-                        frontLeftMotor.setPower(0);
-                        frontRightMotor.setPower(0);
-                        rearRightMotor.setPower(0);
                     }
                 }
                 else
                 {
+                    fr = frbl - rX;
+                    fl = flbr - rX;
+                    br = flbr + rX;
+                    bl = frbl + rX;
+
+
+                    double max = 1;
+                    double denominator = Math.max(Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(br), Math.abs(bl))), 1);
+
+
+                    fr /= denominator;
+                    fl /= denominator;
+                    br /= denominator;
+                    bl /= denominator;
                     telemetry.addLine("Omnimode on");
-                    frontRightMotor.setPower(-fr);
-                    frontLeftMotor.setPower(-fl);
-                    rearRightMotor.setPower(br);
-                    rearLeftMotor.setPower(bl);
                 }
                 if(gamepad1.crossWasPressed())
                 {
                     omniMode = !omniMode;
                 }
 
-                //This is causing issues.
+                if(gamepad1.circleWasPressed())
+                {
+                    imu.resetYaw();
+                    telemetry.addLine("Reset the IMU!");
+                }
                 if (gamepad1.triangleWasPressed())
                 {
                     if(driftingFront)
@@ -181,6 +177,24 @@ public class BartholomewTeleOP extends LinearOpMode
                     }
 
                     driftingFront = !driftingFront;
+                }
+                if(gamepad1.right_bumper)
+                {
+                    frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    rearRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    rearLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    fr = 0;
+                    fl = 0;
+                    bl = 0;
+                    br = 0;
+                }
+                else
+                {
+                    frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    rearRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                    rearLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 }
                 if(driftingFront)
                 {
@@ -200,31 +214,37 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 if (gamepad1.dpad_right)
                 {
-                    double speed = 0.5;
+
                     speed += SPEED_INCREMENT;
                     speed = Math.min(speed, 1.0);
-                    leftPower = leftStickY + leftStickX * speed;
-                    rightPower = -leftStickY + leftStickX * speed;
 
                 }
                 if (gamepad1.dpad_left)
                 {
-                    double speed = 0.5;
                     speed -= SPEED_INCREMENT;
                     speed = Math.max(speed, 0.0);
-                    leftPower = leftStickY + leftStickX * speed;
-                    rightPower = -leftStickY + leftStickX * speed;
 
                 }
-
+                if(gamepad1.left_bumper)
+                {
+                    omniModeIMU = !omniModeIMU;
+                }
+                if(omniModeIMU)
+                {
+                    telemetry.addLine("IMU on");
+                }
+                else if(!omniModeIMU)
+                {
+                    telemetry.addLine("IMU off");
+                }
                 if (gamepad1.backWasPressed()) { imu.resetYaw(); }
-
+                telemetry.addData("Speed", speed);
                 telemetry.update();
+                frontRightMotor.setPower(-fr * speed);
+                frontLeftMotor.setPower(-fl * speed);
+                rearRightMotor.setPower(br * speed);
+                rearLeftMotor.setPower(bl * speed);
             }
-            rearLeftMotor.setPower(0.0);
-            frontLeftMotor.setPower(0.0);
-            rearRightMotor.setPower(0.0);
-            frontRightMotor.setPower(0.0);
         }
     }
 
