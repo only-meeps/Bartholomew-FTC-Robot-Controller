@@ -43,13 +43,17 @@ public class Wheelie extends LinearOpMode {
             telemetry.addData("Roll", yawPitchRollAngles.getRoll());
             telemetry.update();
 
-            if (yawPitchRollAngles.getPitch() < -90){
-                rearLeftMotor.setPower(1);
-                rearRightMotor.setPower(1);
+            if (yawPitchRollAngles.getPitch() < -89){
+                rearLeftMotor.setPower((90-Math.abs(yawPitchRollAngles.getPitch())) / 90);
+                rearRightMotor.setPower(-(90-Math.abs(yawPitchRollAngles.getPitch())) / 90);
             }
-            else if (yawPitchRollAngles.getPitch() > -90){
-                rearLeftMotor.setPower(-1);
-                rearRightMotor.setPower(-1);
+            else if (yawPitchRollAngles.getPitch() > -91){
+                rearLeftMotor.setPower(-(180-Math.abs(yawPitchRollAngles.getPitch())) / 90);
+                rearRightMotor.setPower((180-Math.abs(yawPitchRollAngles.getPitch())) / 90);
+            }
+            else{
+                rearLeftMotor.setPower(0);
+                rearRightMotor.setPower(0);
             }
         }
     }
