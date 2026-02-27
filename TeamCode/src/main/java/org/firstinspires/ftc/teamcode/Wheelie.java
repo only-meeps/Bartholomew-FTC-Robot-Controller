@@ -21,10 +21,17 @@ public class Wheelie extends LinearOpMode {
                         RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         imu.initialize(parameters);
         waitForStart();
-        wait(1000);
+
+        Object myLock = new Object();
+// ...
+        synchronized (myLock) {
+            myLock.wait(1000); // Works because the current thread holds the lock
+        }
         telemetry.addLine("Please hold robot upright on the back wheels until this message disappears.");
         telemetry.update();
-        wait(10000);
+        synchronized (myLock) {
+            myLock.wait(10000); // Works because the current thread holds the lock
+        }
         telemetry.update();
 
 
