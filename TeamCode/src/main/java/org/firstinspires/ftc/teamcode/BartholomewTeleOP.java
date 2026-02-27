@@ -3,6 +3,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -45,6 +46,8 @@ public class BartholomewTeleOP extends LinearOpMode
         frontRightMotor = hardwareMap.get(DcMotor.class, "fr_motor");
         rearLeftMotor = hardwareMap.get(DcMotor.class, "rl_motor");
         rearRightMotor = hardwareMap.get(DcMotor.class, "rr_motor");
+        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rearRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         imu = hardwareMap.get(IMU.class, "imu");
 
         IMU.Parameters parameters = new IMU.Parameters(
@@ -102,8 +105,8 @@ public class BartholomewTeleOP extends LinearOpMode
                     {
                         if(driftingRear)
                         {
-                            br = -rightStickX;
-                            bl = -rightStickX;
+                            br = rightStickX;
+                            bl = rightStickX;
                         }
                         else if(driftingFront)
                         {
@@ -120,8 +123,8 @@ public class BartholomewTeleOP extends LinearOpMode
                     }
                     else if(leftStickY != 0)
                     {
-                        bl = -leftStickY;
-                        fl = -leftStickY;
+                        bl = leftStickY;
+                        fl = leftStickY;
                         fr = leftStickY;
                         br = leftStickY;
                     }
@@ -136,8 +139,8 @@ public class BartholomewTeleOP extends LinearOpMode
                 else
                 {
                     fr = frbl - rX;
-                    fl = flbr - rX;
-                    br = flbr + rX;
+                    fl = flbr + rX;
+                    br = flbr - rX;
                     bl = frbl + rX;
 
 
