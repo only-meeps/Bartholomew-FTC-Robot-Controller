@@ -112,16 +112,16 @@ public class BartholomewTeleOP extends LinearOpMode
                         }
                         else
                         {
-                            bl = -rightStickX;
-                            fl = -rightStickX;
+                            bl = rightStickX;
+                            fl = rightStickX;
                             fr = rightStickX;
                             br = rightStickX;
                         }
                     }
                     else if(leftStickY != 0)
                     {
-                        bl = leftStickY;
-                        fl = leftStickY;
+                        bl = -leftStickY;
+                        fl = -leftStickY;
                         fr = leftStickY;
                         br = leftStickY;
                     }
@@ -145,8 +145,8 @@ public class BartholomewTeleOP extends LinearOpMode
                     double denominator = Math.max(Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(br), Math.abs(bl))), 1);
 
 
-                    fr /= denominator;
-                    fl /= denominator;
+                    fr /= -denominator;
+                    fl /= -denominator;
                     br /= denominator;
                     bl /= denominator;
                     telemetry.addLine("Omnimode on");
@@ -189,12 +189,20 @@ public class BartholomewTeleOP extends LinearOpMode
                     bl = 0;
                     br = 0;
                 }
+
                 else
                 {
                     frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     rearRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                     rearLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                }
+                if(omniMode)
+                {
+                    frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    rearRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                    rearLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
                 }
                 if(driftingFront)
                 {
@@ -239,6 +247,10 @@ public class BartholomewTeleOP extends LinearOpMode
                 }
                 if (gamepad1.backWasPressed()) { imu.resetYaw(); }
                 telemetry.addData("Speed", speed);
+                telemetry.addData("Front Left", fl);
+                telemetry.addData("Front Right", fr);
+                telemetry.addData("Rear Left", bl);
+                telemetry.addData("Rear Right", br);
                 telemetry.update();
                 frontRightMotor.setPower(fr);
                 frontLeftMotor.setPower(fl);
